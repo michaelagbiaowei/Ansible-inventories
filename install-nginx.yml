@@ -1,0 +1,41 @@
+# install Nginx using Ansible
+- name: Setup nginx server on myserver list (host group)
+  hosts: myservers
+  become: True
+  vars:
+    nginx_version: 1.12
+    base_path: /home/vagrant
+  tasks:
+    # first task --- instal nginx
+    - name: Install the latest version of nginx
+      apt: name=nginx version={{nginx_version}}
+      # -y installs without a prompt
+      # passing an agguement where nginx will be installed
+      args:
+        #   # creating a path on the machine that nginx will be installed on and --- if path already exits then, skip this process
+        create: /sbin/nginx
+
+    # second task --- start the service
+    - name: Start nginx
+      service:
+        name: nginx
+        enabled: yes
+        state: started
+
+    # third task --- enable nginx service
+    # - name: nginx
+    # enabled: yes
+
+    # forth task --- confirm nginx version
+    - name: Get nginx installed version
+      command: nginx -v
+
+    # fifth task --- connfirm status
+    - name: Getthe status of nginx service
+      command: sudo systemctl status nginx
+
+    # sixth task --- copy file to remote server
+    - name: Ansible copy file to remote server
+      copy:
+        src: "{{base_path}}sample.txt"
+        dest: { { base_path } }
